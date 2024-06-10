@@ -334,18 +334,18 @@ static int ply_load_bpf(struct ply *ply)
 	if (ply_config.verify) {
 		/* According to libbpf, the recommended buffer size is
 		 * 16MB (!) */
-		vlog = malloc(16 << 20);
+		vlog = malloc((16 << 20) -1);
 		if (vlog) {
-			vlog_sz = 16 << 20;
+			vlog_sz = (16 << 20) -1;
 			goto load;
 		}
 
 		_w("not enough memory for the recommended 16M verifier "
 		   "buffer, trying 1M\n");
 
-		vlog = malloc(1 << 20);
+		vlog = malloc((1 << 20) - 1);
 		if (vlog) {
-			vlog_sz = 1 << 20;
+			vlog_sz = (1 << 20) - 1;
 			goto load;
 		}
 
