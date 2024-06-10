@@ -264,7 +264,13 @@ int ply_unload(struct ply *ply)
 		if (!pb->special || strcmp(pb->provider->name, "END"))
 			continue;
 
-		err = bpf_prog_test_run(pb->bpf_fd);
+		err = pb->provider->attach(pb);
+		if (err)
+			return err;
+
+		trigger_end_probe(pb);
+
+		err = pb->provider->detach(pb);
 		if (err)
 			return err;
 
@@ -385,7 +391,13 @@ static struct ply_return ply_load_attach(struct ply *ply)
 		if (!pb->special || strcmp(pb->provider->name, "BEGIN"))
 			continue;
 
-		err = bpf_prog_test_run(pb->bpf_fd);
+		err = pb->provider->attach(pb);
+		if (err)
+			goto err;
+
+		trigger_begin_probe(pb);
+
+		err = pb->provider->detach(pb);
 		if (err)
 			goto err;
 
@@ -530,7 +542,9 @@ err:
 	return err;
 }
 
-void ply_init(void)
+extern int register_special_probes(special_probe_t begin, special_probe_t end);
+
+void ply_init(special_probe_t begin, special_probe_t end)
 {
 	static int init_done = 0;
 
@@ -539,6 +553,8 @@ void ply_init(void)
 
 	provider_init();
 	built_in_init();
+
+	register_special_probes(begin, end);
 
 	init_done = 1;
 }
