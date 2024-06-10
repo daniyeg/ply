@@ -40,6 +40,7 @@ AC_SUBST(arch)
 AS_CASE($host_cpu,
 	arm*, arch=arm,
 	mips*, arch=mips,
+	powerpc*, arch=powerpc,
 	arch=$host_cpu)
 
 AC_OUTPUT
