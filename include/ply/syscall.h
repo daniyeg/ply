@@ -34,6 +34,11 @@ int bpf_map_next  (int fd, void *key, void *next_key);
 #define LINUX_HAS_RAW_TP_TEST_RUN
 #endif
 
+#ifndef BPF_FUNC_probe_read_kernel
+#define BPF_FUNC_probe_read_kernel     BPF_FUNC_probe_read
+#define BPF_FUNC_probe_read_kernel_str BPF_FUNC_probe_read_str
+#endif
+
 int perf_event_open(struct perf_event_attr *hw_event, pid_t pid,
 		    int cpu, int group_fd, unsigned long flags);
 
