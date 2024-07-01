@@ -264,7 +264,17 @@ int ply_unload(struct ply *ply)
 		if (!pb->special || strcmp(pb->provider->name, "END"))
 			continue;
 
+#ifdef LINUX_HAS_RAW_TP_TEST_RUN
 		err = bpf_prog_test_run(pb->bpf_fd);
+#else
+		err = pb->provider->attach(pb);
+		if (err)
+			return err;
+
+		trigger_end_probe(pb);
+
+		err = pb->provider->detach(pb);
+#endif
 		if (err)
 			return err;
 
@@ -385,7 +395,17 @@ static struct ply_return ply_load_attach(struct ply *ply)
 		if (!pb->special || strcmp(pb->provider->name, "BEGIN"))
 			continue;
 
+#ifdef LINUX_HAS_RAW_TP_TEST_RUN
 		err = bpf_prog_test_run(pb->bpf_fd);
+#else
+		err = pb->provider->attach(pb);
+		if (err)
+			goto err;
+
+		trigger_begin_probe(pb);
+
+		err = pb->provider->detach(pb);
+#endif
 		if (err)
 			goto err;
 
@@ -530,7 +550,9 @@ err:
 	return err;
 }
 
-void ply_init(void)
+extern int register_special_probes(special_probe_t begin, special_probe_t end);
+
+void ply_init(special_probe_t begin, special_probe_t end)
 {
 	static int init_done = 0;
 
@@ -539,6 +561,10 @@ void ply_init(void)
 
 	provider_init();
 	built_in_init();
+
+#ifndef LINUX_HAS_RAW_TP_TEST_RUN
+	register_special_probes(begin, end);
+#endif
 
 	init_done = 1;
 }

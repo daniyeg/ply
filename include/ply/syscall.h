@@ -30,6 +30,9 @@ int bpf_map_next  (int fd, void *key, void *next_key);
 #if (LINUX_VERSION_CODE >= KERNEL_VERSION(4, 7, 0))
 #define LINUX_HAS_TRACEPOINT
 #endif
+#if (LINUX_VERSION_CODE >= KERNEL_VERSION(5, 10, 0))
+#define LINUX_HAS_RAW_TP_TEST_RUN
+#endif
 
 int perf_event_open(struct perf_event_attr *hw_event, pid_t pid,
 		    int cpu, int group_fd, unsigned long flags);
